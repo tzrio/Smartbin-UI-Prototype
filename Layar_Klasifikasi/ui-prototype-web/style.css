@@ -1,0 +1,411 @@
+/*
+  Style untuk prototype UI embedded (240×320).
+  Fokus: tampilan bersih, readable, dan mudah dipindahkan ke firmware UI.
+*/
+
+:root {
+  /* Color tokens */
+  --bg: #f4f8fb;
+  --panel: #ffffff;
+  --screen: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --line: rgba(15, 23, 42, 0.14);
+
+  --primary: #14b8a6;
+  --danger: #ef4444;
+  --ghost: rgba(15, 23, 42, 0.05);
+
+  --waste-yellow: #facc15;
+  --waste-yellow-border: rgba(161, 98, 7, 0.45);
+  --waste-green: #16a34a;
+  --waste-green-border: rgba(5, 150, 105, 0.55);
+  --waste-ink: #0b1220;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background:
+    radial-gradient(900px 520px at 10% 10%, rgba(20, 184, 166, 0.12), transparent 60%),
+    radial-gradient(900px 520px at 90% 15%, rgba(59, 130, 246, 0.10), transparent 62%),
+    var(--bg);
+  color: var(--text);
+}
+
+/* Page layout: device mock + notes */
+.stage {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 18px;
+  align-items: start;
+  justify-items: center;
+}
+
+@media (min-width: 900px) {
+  .stage {
+    grid-template-columns: 420px 1fr;
+    justify-items: start;
+  }
+}
+
+/* Device frame (outer shell) */
+.device {
+  width: 380px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.78));
+  padding: 14px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.topbar__title {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* Screen bezel (black frame) + inside area */
+.screen {
+  margin-top: 12px;
+  border: 10px solid rgba(15, 23, 42, 0.55);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.90);
+  padding: 10px;
+  display: grid;
+  place-items: center;
+}
+
+/* TFT active area: 240x320 portrait, scaled */
+.view {
+  width: 240px;
+  height: 320px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(20, 184, 166, 0.10), transparent 28%), var(--screen);
+  border: 1px solid var(--line);
+  padding: 14px;
+  display: none;
+  overflow: hidden;
+}
+
+.view--active {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.h1 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.sub {
+  margin: 8px 0 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+}
+
+/*
+  NOTE: selector #view-home merupakan sisa eksperimen awal.
+  Tidak mengganggu runtime karena view tersebut tidak ada di HTML.
+*/
+/* Keep Home content from pushing footer off-screen */
+#view-home .grid {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-bottom: 6px;
+}
+
+/* Keep Classification content from pushing/overlapping footer */
+#view-classify .grid {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-bottom: 10px;
+}
+
+#view-session .grid {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-bottom: 10px;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+#view-session .grid .btn--block {
+  margin-top: 0;
+}
+
+/* Buttons: dibuat besar agar nyaman di layar sentuh kecil */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.90);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  color: currentColor;
+  flex: 0 0 auto;
+}
+
+.icon--biohazard {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.btn__title {
+  font-weight: 750;
+  font-size: 14px;
+}
+
+.btn__desc {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.25;
+}
+
+.btn--primary {
+  background: rgba(20, 184, 166, 0.14);
+  border-color: rgba(20, 184, 166, 0.40);
+}
+
+.btn--block {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.btn--danger {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.40);
+}
+
+/* Waste color coding */
+.btn--waste-yellow {
+  /* Match card theme-yellow (lighter, "medical clean") */
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.22), rgba(248, 250, 252, 0.95));
+  border-color: var(--waste-yellow-border);
+  color: var(--waste-ink);
+}
+
+/* Subtle differentiation (still yellow) */
+.btn--waste-sharps {
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.28), rgba(248, 250, 252, 0.95));
+}
+
+.btn--waste-infectious {
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.18), rgba(248, 250, 252, 0.95));
+}
+
+.btn--waste-green {
+  /* Match card theme-green (lighter, consistent with confirm/session) */
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.18), rgba(248, 250, 252, 0.95));
+  border-color: var(--waste-green-border);
+  color: #04130a;
+}
+
+.btn--waste-yellow .btn__desc,
+.btn--waste-green .btn__desc {
+  color: rgba(11, 18, 32, 0.78);
+}
+
+.btn--waste-infectious .icon,
+.btn--waste-sharps .icon {
+  color: rgba(11, 18, 32, 0.95);
+}
+
+.btn--ghost {
+  background: var(--ghost);
+}
+
+/* Success screen spacing */
+#btnHome {
+  margin-top: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  background: rgba(248, 250, 252, 0.95);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.card--choice {
+  padding: 12px;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.choice__icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text);
+  flex: 0 0 auto;
+}
+
+.choice__icon svg {
+  display: block;
+}
+
+.choice__text {
+  min-width: 0;
+}
+
+.card--choice .card__value {
+  margin-top: 4px;
+}
+
+.card--choice .card__note {
+  margin-top: 10px;
+}
+
+.theme-neutral {
+  border-color: var(--line);
+}
+
+.theme-yellow {
+  border-color: var(--waste-yellow-border);
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.22), rgba(248, 250, 252, 0.95));
+}
+
+.theme-yellow .choice__icon {
+  border-color: var(--waste-yellow-border);
+  background: rgba(250, 204, 21, 0.20);
+  color: var(--waste-ink);
+}
+
+.theme-green {
+  border-color: var(--waste-green-border);
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.18), rgba(248, 250, 252, 0.95));
+}
+
+.theme-green .choice__icon {
+  border-color: var(--waste-green-border);
+  background: rgba(22, 163, 74, 0.16);
+  color: #04130a;
+}
+
+.card__label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.card__value {
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.card__note {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.25;
+}
+
+.progress {
+  margin-top: 12px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.75);
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(20, 184, 166, 0.70), rgba(20, 184, 166, 0.25));
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  background: var(--screen);
+}
+
+.hint {
+  font-size: 10px;
+  color: rgba(71, 85, 105, 0.90);
+}
+
+.notes {
+  width: min(520px, 100%);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 14px 16px;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(15, 23, 42, 0.78);
+  font-size: 12px;
+  line-height: 1.5;
+}

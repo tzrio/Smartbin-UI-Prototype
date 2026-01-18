@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <!--
+      Prototype UI layar 240×320 (portrait) untuk SmartBin/Safety Bin.
+      - Semua layar (step) ada sebagai <section class="view">.
+      - JavaScript akan mengaktifkan 1 layar dengan menambahkan class `view--active`.
+      - Gunakan file ini untuk demo interaktif + flow state.
+    -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Safety Bin — UI 240×320</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <section class="device" aria-label="Mock TFT 240x320">
+        <header class="topbar">
+          <div class="topbar__title">Safety Bin</div>
+        </header>
+
+        <div class="screen" id="screen">
+          <!--
+            VIEW 1: RFID (Menu Awal)
+            - `btnScan` mensimulasikan scan RFID.
+            - `rfidStatus` di-update oleh JS.
+          -->
+          <section class="view view--active" id="view-rfid" aria-label="RFID">
+            <h1 class="h1">Akses Nakes</h1>
+            <p class="sub">Tempelkan kartu RFID untuk membuka bin.</p>
+
+            <div class="card">
+              <div class="card__label">Status</div>
+              <div class="card__value" id="rfidStatus">Menunggu RFID…</div>
+              <div class="card__note">(Prototype: gunakan tombol simulasi)</div>
+            </div>
+
+            <button class="btn btn--primary btn--block" id="btnScan" type="button">Simulasi Scan RFID</button>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Akses: Tidak Aktif</div>
+              <div class="hint">Safety Bin</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 2: Open Lid
+            - `btnOpenLid` memulai animasi progress (bar) dan pindah ke layar berikutnya.
+            - `openProgress` + `openBar` adalah elemen progress yang dimanipulasi JS.
+          -->
+          <section class="view" id="view-open" aria-label="Buka Penutup">
+            <h1 class="h1">Buka Penutup</h1>
+            <p class="sub">Tekan tombol untuk membuka penutup bin.</p>
+
+            <button class="btn btn--primary btn--block" id="btnOpenLid" type="button">Buka Penutup Bin</button>
+
+            <div class="progress" id="openProgress" aria-label="Proses" style="display:none">
+              <div class="progress__bar" id="openBar"></div>
+            </div>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Langkah 2/6</div>
+              <div class="hint">Penutup: buka</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 3: Insert Waste
+            - Tombol `btnInserted` melanjutkan flow (tutup penutup).
+          -->
+          <section class="view" id="view-insert" aria-label="Masukkan Sampah">
+            <h1 class="h1">Masukkan Sampah</h1>
+            <p class="sub">Masukkan sampah, lalu lanjutkan.</p>
+
+            <div class="card">
+              <div class="card__label">Instruksi</div>
+              <div class="card__value">Masukkan limbah ke lubang.</div>
+              <div class="card__note">Pastikan tangan aman dari benda tajam.</div>
+            </div>
+
+            <button class="btn btn--primary btn--block" id="btnInserted" type="button">Sampah Sudah Dimasukkan</button>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Langkah 3/6</div>
+              <div class="hint">Penutup: terbuka</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 4: Closing Lid
+            - Menampilkan progress penutupan (mock) sebelum masuk ke klasifikasi.
+          -->
+          <section class="view" id="view-closing" aria-label="Menutup Penutup">
+            <h1 class="h1">Menutup Penutup</h1>
+            <p class="sub">Penutup sedang ditutup…</p>
+
+            <div class="progress" aria-label="Proses">
+              <div class="progress__bar" id="closingBar"></div>
+            </div>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Langkah 4/6</div>
+              <div class="hint">Penutup: menutup</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 5: Classification
+            - Tombol kategori punya attribute `data-choice`.
+            - JS membaca `data-choice` untuk menentukan kategori.
+            - Failsafe countdown ditampilkan di `idleCountdown`.
+          -->
+          <section class="view" id="view-classify" aria-label="Pilih Klasifikasi">
+            <h1 class="h1">Pilih Klasifikasi</h1>
+            <p class="sub">Sentuh salah satu kategori limbah.</p>
+
+            <div class="grid">
+              <button class="btn btn--waste-yellow btn--waste-sharps" data-choice="sharps" type="button">
+                <div class="btn__header">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 21l6.5-6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M8.2 11.8l6.8-6.8c.9-.9 2.3-.9 3.2 0l.8.8c.9.9.9 2.3 0 3.2l-6.8 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M14.5 6.5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M6.5 18.5l-3.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                  <div class="btn__title">Limbah Benda Tajam</div>
+                </div>
+                <div class="btn__desc">Jarum, pisau bedah, ampul</div>
+              </button>
+
+              <button class="btn btn--waste-yellow btn--waste-infectious" data-choice="infeksius" type="button">
+                <div class="btn__header">
+                  <span class="icon icon--biohazard" aria-hidden="true">☣</span>
+                  <div class="btn__title">Limbah Infeksius</div>
+                </div>
+                <div class="btn__desc">Terpapar darah/cairan tubuh</div>
+              </button>
+
+              <button class="btn btn--waste-green" data-choice="noninfeksius" type="button">
+                <div class="btn__header">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M10 7V5h4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M7 7l1 14h8l1-14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                      <path d="M10 11v7M14 11v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                  <div class="btn__title">Limbah Noninfeksius</div>
+                </div>
+                <div class="btn__desc">Kertas, plastik bersih, kemasan</div>
+              </button>
+            </div>
+
+            <footer class="footer" aria-label="Failsafe">
+              <div class="hint">Failsafe: <span id="idleCountdown">01:00</span></div>
+              <div class="hint">Auto pilih infeksius</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 6: Confirmation
+            - Menampilkan pilihan kategori sebelum routing.
+            - `btnConfirmBack` kembali ke layar klasifikasi.
+            - `btnConfirmOk` melanjutkan ke routing.
+          -->
+          <section class="view" id="view-confirm" aria-label="Konfirmasi">
+            <h1 class="h1">Konfirmasi</h1>
+            <p class="sub">Kamu memilih:</p>
+
+            <div class="card card--choice theme-neutral" id="confirmCard" role="status" aria-live="polite">
+              <div class="choice">
+                <span class="choice__icon" id="confirmIcon" aria-hidden="true"></span>
+                <div class="choice__text">
+                  <div class="card__label">Kategori</div>
+                  <div class="card__value" id="confirmLabel">-</div>
+                </div>
+              </div>
+              <div class="card__note" id="confirmNote">-</div>
+            </div>
+
+            <div class="row" aria-label="Aksi">
+              <button class="btn btn--ghost" id="btnConfirmBack" type="button">Kembali</button>
+              <button class="btn btn--primary" id="btnConfirmOk" type="button">OK</button>
+            </div>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Konfirmasi pilihan</div>
+              <div class="hint">Safety Bin</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 7: Routing (Motor)
+            - Progress bar `routeBar` berjalan selama ROUTING_MS.
+            - Setelah selesai, masuk ke layar session actions.
+          -->
+          <section class="view" id="view-routing" aria-label="Mengarah ke Bin">
+            <h1 class="h1">Mengarah…</h1>
+            <p class="sub">Sampah diarahkan ke bin yang sesuai.</p>
+
+            <div class="card card--choice theme-neutral" id="routeCard" role="status" aria-live="polite">
+              <div class="choice">
+                <span class="choice__icon" id="routeIcon" aria-hidden="true"></span>
+                <div class="choice__text">
+                  <div class="card__label">Tujuan</div>
+                  <div class="card__value" id="routeLabel">-</div>
+                </div>
+              </div>
+              <div class="card__note" id="routeNote">Motor bergerak…</div>
+            </div>
+
+            <div class="progress" aria-label="Proses">
+              <div class="progress__bar" id="routeBar"></div>
+            </div>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Langkah 6/6</div>
+              <div class="hint">Selesai…</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 8: Session Actions
+            - `btnOpenAgain` kembali ke flow buang sampah (tanpa login ulang).
+            - `btnLogout` mengakhiri session (kembali ke RFID).
+          -->
+          <section class="view" id="view-session" aria-label="Aksi">
+            <h1 class="h1">Pilih Aksi</h1>
+            <p class="sub">Berhasil dipilah. Lanjutkan atau selesai.</p>
+
+            <div class="card card--choice theme-neutral" id="sessionCard" role="status" aria-live="polite">
+              <div class="choice">
+                <span class="choice__icon" id="sessionIcon" aria-hidden="true"></span>
+                <div class="choice__text">
+                  <div class="card__label">Status</div>
+                  <div class="card__value" id="sessionLabel">Berhasil dipilah</div>
+                </div>
+              </div>
+              <div class="card__note" id="sessionNote">-</div>
+            </div>
+
+            <div class="grid">
+              <button class="btn btn--primary btn--block" id="btnOpenAgain" type="button">Lanjut Buang Sampah</button>
+              <button class="btn btn--danger btn--block" id="btnLogout" type="button">Selesai</button>
+            </div>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Akses: aktif</div>
+              <div class="hint">Safety Bin</div>
+            </footer>
+          </section>
+        </div>
+      </section>
+
+      <aside class="notes" aria-label="Catatan">
+        <h2 class="h2">Catatan</h2>
+        <ul class="list">
+          <li>Frame hitam = modul TFT; area dalam = 240×320 px.</li>
+          <li>Layout dibuat minimal, mirip UI embedded.</li>
+          <li>Kamu bisa ubah teks/warna sesuai kebutuhan esai.</li>
+        </ul>
+      </aside>
+    </main>
+
+    <!-- Script di-load terakhir agar DOM sudah siap sebelum wiring event. -->
+    <script src="./app.js"></script>
+  </body>
+</html>

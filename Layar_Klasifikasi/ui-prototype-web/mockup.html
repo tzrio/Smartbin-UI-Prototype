@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <!--
+      Storyboard mockup (statis) untuk screenshot per-layar.
+      - Tidak menggunakan JavaScript.
+      - Semua layar ditampilkan sekaligus dalam grid.
+      - Cocok untuk dokumentasi/esai ketika butuh semua state UI terlihat.
+    -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Safety Bin — Mockup Storyboard (240×320)</title>
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+      /* Mockup-only layout (no JS, all screens visible) */
+      .stage { grid-template-columns: 1fr; }
+      .notes { display: none; }
+
+      .mockup-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+        gap: 16px;
+        align-items: start;
+      }
+
+      .mockup-title {
+        margin: 0 0 10px;
+        font-size: 14px;
+        color: rgba(15, 23, 42, 0.75);
+      }
+
+      /* Make views always visible in storyboard */
+      .view { display: flex; flex-direction: column; }
+
+      /* Keep progress bars at specific states */
+      .progress__bar[data-pct="20"] { width: 20% !important; }
+      .progress__bar[data-pct="60"] { width: 60% !important; }
+      .progress__bar[data-pct="100"] { width: 100% !important; }
+    </style>
+  </head>
+  <body>
+    <main class="stage">
+      <div class="mockup-grid" aria-label="Storyboard mockup">
+        <!-- 1) RFID -->
+        <section>
+          <h2 class="mockup-title">1) RFID</h2>
+          <!--
+            Layar awal: akses RFID untuk nakes.
+            Di versi interaktif (`index.html`) tombol scan akan mengubah state session.
+          -->
+          <section class="device" aria-label="Mock TFT 240x320">
+            <header class="topbar"><div class="topbar__title">Safety Bin</div></header>
+            <div class="screen">
+              <section class="view" aria-label="RFID">
+                <h1 class="h1">Akses Nakes</h1>
+                <p class="sub">Tempelkan kartu RFID untuk membuka bin.</p>
+
+                <div class="card">
+                  <div class="card__label">Status</div>
+                  <div class="card__value">Menunggu RFID…</div>
+                  <div class="card__note">(Mockup untuk esai)</div>
+                </div>
+
+                <button class="btn btn--primary btn--block" type="button">Scan RFID</button>
+
+                <footer class="footer" aria-label="Info">
+                  <div class="hint">Akses: RFID</div>
+                  <div class="hint">Safety Bin</div>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <!-- 2) Open Lid (loading) -->
+        <section>
+          <h2 class="mockup-title">2) Buka Penutup (loading)</h2>
+          <!-- Menampilkan progress bar kondisi "membuka". -->
+          <section class="device" aria-label="Mock TFT 240x320">
+            <header class="topbar"><div class="topbar__title">Safety Bin</div></header>
+            <div class="screen">
+              <section class="view" aria-label="Buka Penutup">
+                <h1 class="h1">Buka Penutup</h1>
+                <p class="sub">Penutup sedang dibuka…</p>
+
+                <button class="btn btn--primary btn--block" type="button" disabled>Membuka…</button>
+
+                <div class="progress" aria-label="Proses">
+                  <div class="progress__bar" data-pct="60"></div>
+                </div>
+
+                <footer class="footer" aria-label="Info">
+                  <div class="hint">Langkah 2/6</div>
+                  <div class="hint">Penutup: buka</div>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <!-- 3) Insert Waste -->
+        <section>
+          <h2 class="mockup-title">3) Masukkan Sampah</h2>
+          <!-- Instruksi sederhana sebelum klasifikasi. -->
+          <section class="device" aria-label="Mock TFT 240x320">
+            <header class="topbar"><div class="topbar__title">Safety Bin</div></header>
+            <div class="screen">
+              <section class="view" aria-label="Masukkan Sampah">
+                <h1 class="h1">Masukkan Sampah</h1>
+                <p class="sub">Masukkan sampah, lalu lanjutkan.</p>
+
+                <div class="card">
+                  <div class="card__label">Instruksi</div>
+                  <div class="card__value">Masukkan limbah ke lubang.</div>
+                  <div class="card__note">Pastikan tangan aman dari benda tajam.</div>
+                </div>
+
+                <button class="btn btn--primary btn--block" type="button">Sampah Sudah Dimasukkan</button>
+
+                <footer class="footer" aria-label="Info">
+                  <div class="hint">Langkah 3/6</div>
+                  <div class="hint">Penutup: terbuka</div>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <!-- 4) Closing Lid -->
+        <section>
+          <h2 class="mockup-title">4) Menutup Penutup</h2>
+          <!-- Menampilkan progress bar kondisi "menutup". -->
+          <section class="device" aria-label="Mock TFT 240x320">
+            <header class="topbar"><div class="topbar__title">Safety Bin</div></header>
+            <div class="screen">
+              <section class="view" aria-label="Menutup Penutup">
+                <h1 class="h1">Menutup Penutup</h1>
+                <p class="sub">Penutup sedang ditutup…</p>
+
+                <div class="progress" aria-label="Proses">
+                  <div class="progress__bar" data-pct="60"></div>
+                </div>
+
+                <footer class="footer" aria-label="Info">
+                  <div class="hint">Langkah 4/6</div>
+                  <div class="hint">Penutup: menutup</div>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <!-- 5) Classification -->
+        <section>
+          <h2 class="mockup-title">5) Pilih Klasifikasi (failsafe)</h2>
+          <!--
+            3 opsi kategori limbah (warna kuning/hijau).
+            Failsafe countdown ditampilkan di footer.
+          -->
+          <section class="device" aria-label="Mock TFT 240x320">
+            <header class="topbar"><div class="topbar__title">Safety Bin</div></header>
+            <div class="screen">
+              <section class="view" aria-label="Pilih Klasifikasi">
+                <h1 class="h1">Pilih Klasifikasi</h1>
+                <p class="sub">Sentuh salah satu kategori limbah.</p>
+
+                <div class="grid">
+                  <button class="btn btn--waste-yellow btn--waste-sharps" type="button">
+                    <div class="btn__header">
+                      <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3 21l6.5-6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          <path d="M8.2 11.8l6.8-6.8c.9-.9 2.3-.9 3.2 0l.8.8c.9.9.9 2.3 0 3.2l-6.8 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          <path d="M14.5 6.5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          <path d="M6.5 18.5l-3.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                      <div class="btn__title">Limbah Benda Tajam</div>
+                    </div>
+                    <div class="btn__desc">Jarum, pisau bedah, ampul</div>
+                  </button>
+
+                  <button class="btn btn--waste-yellow btn--waste-infectious" type="button">
+                    <div class="btn__header">
+                      <span class="icon icon--biohazard" aria-hidden="true">☣</span>
+                      <div class="btn__title">Limbah Infeksius</div>
+                    </div>
+                    <div class="btn__desc">Terpapar darah/cairan tubuh</div>
+                  </button>
+
+                  <button class="btn btn--waste-green" type="button">
+                    <div class="btn__header">
+                      <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M8 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          <path d="M10 7V5h4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          <path d="M7 7l1 14h8l1-14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                          <path d="M10 11v7M14 11v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                      <div class="btn__title">Limbah Noninfeksius</div>
+                    </div>
+                    <div class="btn__desc">Kertas, plastik bersih, kemasan</div>
+                  </button>
+                </div>
+
+                <footer class="footer" aria-label="Failsafe">
+                  <div class="hint">Failsafe: <span>01:00</span></div>
+                  <div class="hint">Auto pilih infeksius</div>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <!-- 6) Confirmation -->
+        <section>
+          <h2 class="mockup-title">6) Konfirmasi</h2>
+          <!-- Konfirmasi sebelum motor routing mengarah ke bin tujuan. -->
+          <section class="device" aria-label="Mock TFT 240x320">
+            <header class="topbar"><div class="topbar__title">Safety Bin</div></header>
+            <div class="screen">
+              <section class="view" aria-label="Konfirmasi">
+                <h1 class="h1">Konfirmasi</h1>
+                <p class="sub">Kamu memilih:</p>
+
+                <div class="card card--choice theme-yellow" role="status" aria-live="polite">
+                  <div class="choice">
+                    <span class="choice__icon" aria-hidden="true"><span style="font-size:22px;line-height:1">☣</span></span>
+                    <div class="choice__text">
+                      <div class="card__label">Kategori</div>
+                      <div class="card__value">Limbah Infeksius</div>
+                    </div>
+                  </div>
+                  <div class="card__note">Contoh: limbah terkontaminasi darah/cairan tubuh (kasa, sarung tangan, dll).</div>
+                </div>
+
+                <div class="row" aria-label="Aksi">
+                  <button class="btn btn--ghost" type="button">Kembali</button>
+                  <button class="btn btn--primary" type="button">OK</button>
+                </div>
+
+                <footer class="footer" aria-label="Info">
+                  <div class="hint">Konfirmasi pilihan</div>
+                  <div class="hint">Safety Bin</div>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <!-- 7) Routing -->
+        <section>
+          <h2 class="mockup-title">7) Mengarah (motor routing)</h2>
+          <!-- Status routing (mock) + progress bar. -->
+          <section class="device" aria-label="Mock TFT 240x320">
+            <header class="topbar"><div class="topbar__title">Safety Bin</div></header>
+            <div class="screen">
+              <section class="view" aria-label="Mengarah ke Bin">
+                <h1 class="h1">Mengarah…</h1>
+                <p class="sub">Sampah diarahkan ke bin yang sesuai.</p>
+
+                <div class="card card--choice theme-yellow" role="status" aria-live="polite">
+                  <div class="choice">
+                    <span class="choice__icon" aria-hidden="true"><span style="font-size:22px;line-height:1">☣</span></span>
+                    <div class="choice__text">
+                      <div class="card__label">Tujuan</div>
+                      <div class="card__value">Limbah Infeksius</div>
+                    </div>
+                  </div>
+                  <div class="card__note">Motor bergerak…</div>
+                </div>
+
+                <div class="progress" aria-label="Proses">
+                  <div class="progress__bar" data-pct="60"></div>
+                </div>
+
+                <footer class="footer" aria-label="Info">
+                  <div class="hint">Langkah 6/6</div>
+                  <div class="hint">Selesai…</div>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <!-- 8) Success + actions -->
+        <section>
+          <h2 class="mockup-title">8) Berhasil dipilah + pilihan</h2>
+          <!-- Layar akhir: user bisa lanjut buang sampah atau selesai (logout). -->
+          <section class="device" aria-label="Mock TFT 240x320">
+            <header class="topbar"><div class="topbar__title">Safety Bin</div></header>
+            <div class="screen">
+              <section class="view" aria-label="Aksi">
+                <h1 class="h1">Pilih Aksi</h1>
+                <p class="sub">Berhasil dipilah. Lanjutkan atau selesai.</p>
+
+                <div class="card card--choice theme-yellow" role="status" aria-live="polite">
+                  <div class="choice">
+                    <span class="choice__icon" aria-hidden="true"><span style="font-size:22px;line-height:1">☣</span></span>
+                    <div class="choice__text">
+                      <div class="card__label">Status</div>
+                      <div class="card__value">Berhasil dipilah</div>
+                    </div>
+                  </div>
+                  <div class="card__note">Kategori: Limbah Infeksius.</div>
+                </div>
+
+                <div class="grid">
+                  <button class="btn btn--primary btn--block" type="button">Lanjut Buang Sampah</button>
+                  <button class="btn btn--danger btn--block" type="button">Selesai</button>
+                </div>
+
+                <footer class="footer" aria-label="Info">
+                  <div class="hint">Akses: aktif</div>
+                  <div class="hint">RFID</div>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

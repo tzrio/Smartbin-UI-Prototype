@@ -1,0 +1,28 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Node (kalau suatu saat pakai tooling)
+node_modules/
+.npm/
+.pnpm-store/
+yarn-error.log
+
+# Build outputs
+/dist/
+/build/
+/.cache/
+
+# Env / secrets (jaga-jaga)
+.env
+.env.*
+
+# Misc
+*.tmp
+*.swp
