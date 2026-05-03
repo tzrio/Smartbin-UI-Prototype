@@ -2,51 +2,96 @@
 <html lang="id">
   <head>
     <!--
-      Prototype UI layar 240×320 (portrait) untuk SmartBin/Safety Bin.
+      Prototype UI layar 240×320 (2.8" TFT, portrait) untuk Medisafe Bin.
+      Non-touch display — interaksi melalui tombol fisik (disimulasikan di browser).
       - Semua layar (step) ada sebagai <section class="view">.
-      - JavaScript akan mengaktifkan 1 layar dengan menambahkan class `view--active`.
+      - JavaScript mengaktifkan 1 layar dengan class `view--active`.
       - Gunakan file ini untuk demo interaktif + flow state.
+
+      Sistem: Medisafe Bin — Pemilahan Limbah Medis Semi-Otomatis
+      Target: Puskesmas (fasilitas kesehatan primer)
     -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Safety Bin — UI 240×320</title>
+    <title>Medisafe Bin — UI 240×320</title>
+    <meta name="description" content="Prototype UI untuk Medisafe Bin — sistem pemilahan limbah medis padat semi-otomatis untuk puskesmas." />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main class="stage">
-      <section class="device" aria-label="Mock TFT 240x320">
+      <section class="device" aria-label="Mock TFT 280x380 (Medisafe Bin)">
         <header class="topbar">
-          <div class="topbar__title">Safety Bin</div>
+          <div class="topbar__brand">
+            <span class="topbar__cross" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 2h4v6h6v4h-6v6H8v-6H2V8h6V2z"/>
+              </svg>
+            </span>
+            <div class="topbar__title">Medisafe Bin</div>
+          </div>
+          <div class="topbar__leds">
+            <!-- LED Benda Tajam -->
+            <div class="led-group led-group--sharps">
+              <span class="led-group__label">Sharp</span>
+              <span class="led-dot"></span>
+              <span class="led-dot"></span>
+              <span class="led-dot"></span>
+            </div>
+            <!-- LED Infeksius -->
+            <div class="led-group led-group--infeksius">
+              <span class="led-group__label">Infeksius</span>
+              <span class="led-dot"></span>
+              <span class="led-dot"></span>
+              <span class="led-dot"></span>
+            </div>
+          </div>
         </header>
 
         <div class="screen" id="screen">
           <!--
-            VIEW 1: RFID (Menu Awal)
-            - `btnScan` mensimulasikan scan RFID.
-            - `rfidStatus` di-update oleh JS.
+            VIEW 1: RFID — Autentikasi
+            Dua level akses:
+            - Level 1: Tenaga Medis (buang limbah)
+            - Level 2: Petugas Kebersihan (ambil limbah)
           -->
           <section class="view view--active" id="view-rfid" aria-label="RFID">
-            <h1 class="h1">Akses Nakes</h1>
-            <p class="sub">Tempelkan kartu RFID untuk membuka bin.</p>
+            <h1 class="h1">Autentikasi RFID</h1>
+            <p class="sub">Tempelkan kartu RFID untuk mengakses sistem.</p>
+
+            <div class="rfid-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 10h3v4H8z" fill="currentColor" opacity="0.5"/>
+                <path d="M13 10h3M13 14h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
 
             <div class="card">
               <div class="card__label">Status</div>
               <div class="card__value" id="rfidStatus">Menunggu RFID…</div>
-              <div class="card__note">(Prototype: gunakan tombol simulasi)</div>
+              <div class="card__note">(Prototype: pilih level akses di bawah)</div>
             </div>
 
-            <button class="btn btn--primary btn--block" id="btnScan" type="button">Simulasi Scan RFID</button>
+            <div class="grid" style="margin-top:8px; gap:6px;">
+              <button class="btn btn--primary btn--block" id="btnScanMedis" type="button" style="margin-top:0">
+                Simulasi: Tenaga Medis
+                <span class="btn__key">L1</span>
+              </button>
+              <button class="btn btn--ghost btn--block" id="btnScanKebersihan" type="button" style="margin-top:0">
+                Simulasi: Petugas Kebersihan
+                <span class="btn__key">L2</span>
+              </button>
+            </div>
 
             <footer class="footer" aria-label="Info">
-              <div class="hint">Akses: Tidak Aktif</div>
-              <div class="hint">Safety Bin</div>
+              <div class="hint">Akses: Terkunci</div>
+              <div class="hint">Medisafe Bin</div>
             </footer>
           </section>
 
           <!--
             VIEW 2: Open Lid
-            - `btnOpenLid` memulai animasi progress (bar) dan pindah ke layar berikutnya.
-            - `openProgress` + `openBar` adalah elemen progress yang dimanipulasi JS.
+            Servo motor membuka lubang pembuangan.
           -->
           <section class="view" id="view-open" aria-label="Buka Penutup">
             <h1 class="h1">Buka Penutup</h1>
@@ -59,36 +104,36 @@
             </div>
 
             <footer class="footer" aria-label="Info">
-              <div class="hint">Langkah 2/6</div>
-              <div class="hint">Penutup: buka</div>
+              <div class="hint">Langkah 1/7</div>
+              <div class="hint">Akses: Tenaga Medis</div>
             </footer>
           </section>
 
           <!--
             VIEW 3: Insert Waste
-            - Tombol `btnInserted` melanjutkan flow (tutup penutup).
+            Lubang terbuka — petugas memasukkan limbah.
           -->
-          <section class="view" id="view-insert" aria-label="Masukkan Sampah">
-            <h1 class="h1">Masukkan Sampah</h1>
-            <p class="sub">Masukkan sampah, lalu lanjutkan.</p>
+          <section class="view" id="view-insert" aria-label="Masukkan Limbah">
+            <h1 class="h1">Masukkan Limbah</h1>
+            <p class="sub">Masukkan limbah ke lubang, lalu lanjutkan.</p>
 
             <div class="card">
               <div class="card__label">Instruksi</div>
-              <div class="card__value">Masukkan limbah ke lubang.</div>
+              <div class="card__value" style="font-size:13px">Masukkan limbah medis ke lubang.</div>
               <div class="card__note">Pastikan tangan aman dari benda tajam.</div>
             </div>
 
-            <button class="btn btn--primary btn--block" id="btnInserted" type="button">Sampah Sudah Dimasukkan</button>
+            <button class="btn btn--primary btn--block" id="btnInserted" type="button">Limbah Sudah Dimasukkan</button>
 
             <footer class="footer" aria-label="Info">
-              <div class="hint">Langkah 3/6</div>
+              <div class="hint">Langkah 2/7</div>
               <div class="hint">Penutup: terbuka</div>
             </footer>
           </section>
 
           <!--
             VIEW 4: Closing Lid
-            - Menampilkan progress penutupan (mock) sebelum masuk ke klasifikasi.
+            Penutup menutup otomatis sebelum klasifikasi.
           -->
           <section class="view" id="view-closing" aria-label="Menutup Penutup">
             <h1 class="h1">Menutup Penutup</h1>
@@ -99,76 +144,61 @@
             </div>
 
             <footer class="footer" aria-label="Info">
-              <div class="hint">Langkah 4/6</div>
+              <div class="hint">Langkah 3/7</div>
               <div class="hint">Penutup: menutup</div>
             </footer>
           </section>
 
           <!--
-            VIEW 5: Classification
-            - Tombol kategori punya attribute `data-choice`.
-            - JS membaca `data-choice` untuk menentukan kategori.
-            - Failsafe countdown ditampilkan di `idleCountdown`.
+            VIEW 5: Classification (Pilih Kategori)
+            2 kategori: Benda Tajam + Infeksius.
+            Tombol fisik besar, cocok untuk sarung tangan.
+            Fail-safe: timeout → otomatis ke Benda Tajam (safety box rigid).
           -->
           <section class="view" id="view-classify" aria-label="Pilih Klasifikasi">
-            <h1 class="h1">Pilih Klasifikasi</h1>
-            <p class="sub">Sentuh salah satu kategori limbah.</p>
+            <h1 class="h1">Pilih Kategori</h1>
+            <p class="sub">Tekan tombol sesuai jenis limbah.</p>
 
             <div class="grid">
-              <button class="btn btn--waste-yellow btn--waste-sharps" data-choice="sharps" type="button">
+              <button class="btn btn--waste-sharps" data-choice="sharps" type="button">
                 <div class="btn__header">
                   <span class="icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M3 21l6.5-6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                       <path d="M8.2 11.8l6.8-6.8c.9-.9 2.3-.9 3.2 0l.8.8c.9.9.9 2.3 0 3.2l-6.8 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                       <path d="M14.5 6.5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                       <path d="M6.5 18.5l-3.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                   </span>
-                  <div class="btn__title">Limbah Benda Tajam</div>
+                  <div class="btn__title">Benda Tajam</div>
+                  <span class="btn__key">A</span>
                 </div>
-                <div class="btn__desc">Jarum, pisau bedah, ampul</div>
+                <div class="btn__desc">Jarum suntik, ampul, lancet, pisau bedah → Safety Box</div>
               </button>
 
-              <button class="btn btn--waste-yellow btn--waste-infectious" data-choice="infeksius" type="button">
+              <button class="btn btn--waste-infeksius" data-choice="infeksius" type="button">
                 <div class="btn__header">
                   <span class="icon icon--biohazard" aria-hidden="true">☣</span>
-                  <div class="btn__title">Limbah Infeksius</div>
+                  <div class="btn__title">Infeksius</div>
+                  <span class="btn__key">B</span>
                 </div>
-                <div class="btn__desc">Terpapar darah/cairan tubuh</div>
-              </button>
-
-              <button class="btn btn--waste-green" data-choice="noninfeksius" type="button">
-                <div class="btn__header">
-                  <span class="icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M8 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M10 7V5h4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M7 7l1 14h8l1-14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                      <path d="M10 11v7M14 11v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                  </span>
-                  <div class="btn__title">Limbah Noninfeksius</div>
-                </div>
-                <div class="btn__desc">Kertas, plastik bersih, kemasan</div>
+                <div class="btn__desc">Kasa terkontaminasi, sarung tangan bekas, spuit → Kantong Biohazard</div>
               </button>
             </div>
 
             <footer class="footer" aria-label="Failsafe">
-              <div class="hint">Failsafe: <span id="idleCountdown">01:00</span></div>
-              <div class="hint">Auto pilih infeksius</div>
+              <div class="hint">Fail-safe: <span id="idleCountdown">01:00</span></div>
+              <div class="hint">Auto → Benda Tajam</div>
             </footer>
           </section>
 
           <!--
             VIEW 6: Confirmation
-            - Menampilkan pilihan kategori sebelum routing.
-            - `btnConfirmBack` kembali ke layar klasifikasi.
-            - `btnConfirmOk` melanjutkan ke routing.
+            Menampilkan pilihan kategori sebelum routing motor.
           -->
           <section class="view" id="view-confirm" aria-label="Konfirmasi">
             <h1 class="h1">Konfirmasi</h1>
-            <p class="sub">Kamu memilih:</p>
+            <p class="sub">Anda memilih:</p>
 
             <div class="card card--choice theme-neutral" id="confirmCard" role="status" aria-live="polite">
               <div class="choice">
@@ -188,18 +218,17 @@
 
             <footer class="footer" aria-label="Info">
               <div class="hint">Konfirmasi pilihan</div>
-              <div class="hint">Safety Bin</div>
+              <div class="hint">Medisafe Bin</div>
             </footer>
           </section>
 
           <!--
-            VIEW 7: Routing (Motor)
-            - Progress bar `routeBar` berjalan selama ROUTING_MS.
-            - Setelah selesai, masuk ke layar session actions.
+            VIEW 7: Routing (Servo Motor)
+            Servo mengarahkan limbah ke kompartemen yang sesuai.
           -->
           <section class="view" id="view-routing" aria-label="Mengarah ke Bin">
-            <h1 class="h1">Mengarah…</h1>
-            <p class="sub">Sampah diarahkan ke bin yang sesuai.</p>
+            <h1 class="h1">Mengarahkan…</h1>
+            <p class="sub">Servo mengarahkan limbah ke kompartemen.</p>
 
             <div class="card card--choice theme-neutral" id="routeCard" role="status" aria-live="polite">
               <div class="choice">
@@ -209,7 +238,7 @@
                   <div class="card__value" id="routeLabel">-</div>
                 </div>
               </div>
-              <div class="card__note" id="routeNote">Motor bergerak…</div>
+              <div class="card__note" id="routeNote">Servo motor bergerak…</div>
             </div>
 
             <div class="progress" aria-label="Proses">
@@ -217,19 +246,62 @@
             </div>
 
             <footer class="footer" aria-label="Info">
-              <div class="hint">Langkah 6/6</div>
-              <div class="hint">Selesai…</div>
+              <div class="hint">Langkah 5/7</div>
+              <div class="hint">Motor aktif</div>
             </footer>
           </section>
 
           <!--
-            VIEW 8: Session Actions
-            - `btnOpenAgain` kembali ke flow buang sampah (tanpa login ulang).
-            - `btnLogout` mengakhiri session (kembali ke RFID).
+            VIEW 8: Disinfeksi Otomatis
+            Solenoid valve menyemprotkan disinfektan pada area drop.
+          -->
+          <section class="view" id="view-disinfect" aria-label="Disinfeksi">
+            <h1 class="h1">Sterilisasi</h1>
+            <p class="sub">Menyemprotkan disinfektan pada area drop…</p>
+
+            <div class="disinfect-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M8 6h8l1 3H7l1-3z" stroke="currentColor" stroke-width="1.5" fill="currentColor" opacity="0.2"/>
+                <path d="M9 9v10a2 2 0 002 2h2a2 2 0 002-2V9" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M6 14h2M16 14h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M6 17l1.5-1M18 17l-1.5-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+
+            <div class="card card--choice theme-disinfect">
+              <div class="choice">
+                <span class="choice__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 5v2M12 17v2M5 12h2M17 12h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <div class="choice__text">
+                  <div class="card__label">Proses</div>
+                  <div class="card__value" style="font-size:12px">Disinfektan aktif</div>
+                </div>
+              </div>
+              <div class="card__note">Solenoid valve → reservoir disinfektan</div>
+            </div>
+
+            <div class="progress progress--disinfect" aria-label="Proses sterilisasi">
+              <div class="progress__bar" id="disinfectBar"></div>
+            </div>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Langkah 6/7</div>
+              <div class="hint">Sterilisasi area</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 9: Session Actions (Selesai / Lanjut)
+            Setelah satu siklus selesai, user bisa buang lagi atau logout.
           -->
           <section class="view" id="view-session" aria-label="Aksi">
-            <h1 class="h1">Pilih Aksi</h1>
-            <p class="sub">Berhasil dipilah. Lanjutkan atau selesai.</p>
+            <h1 class="h1">Selesai</h1>
+            <p class="sub">Limbah berhasil dipilah dan area sudah disterilisasi.</p>
 
             <div class="card card--choice theme-neutral" id="sessionCard" role="status" aria-live="polite">
               <div class="choice">
@@ -243,29 +315,82 @@
             </div>
 
             <div class="grid">
-              <button class="btn btn--primary btn--block" id="btnOpenAgain" type="button">Lanjut Buang Sampah</button>
-              <button class="btn btn--danger btn--block" id="btnLogout" type="button">Selesai</button>
+              <button class="btn btn--primary btn--block" id="btnOpenAgain" type="button" style="margin-top:0">Buang Limbah Lagi</button>
+              <button class="btn btn--danger btn--block" id="btnLogout" type="button" style="margin-top:0">Selesai (Logout)</button>
             </div>
 
             <footer class="footer" aria-label="Info">
               <div class="hint">Akses: aktif</div>
-              <div class="hint">Safety Bin</div>
+              <div class="hint">Medisafe Bin</div>
+            </footer>
+          </section>
+
+          <!--
+            VIEW 10: Retrieval (Petugas Kebersihan — Level 2)
+            Menampilkan status kapasitas + simulasi buka pintu samping.
+            Flow simpel: lihat status → ambil kompartemen → selesai.
+          -->
+          <section class="view" id="view-retrieval" aria-label="Pengambilan Limbah">
+            <h1 class="h1">Pengambilan Limbah</h1>
+            <p class="sub">Status kompartemen:</p>
+
+            <div class="compartment-status">
+              <!-- Benda Tajam -->
+              <div class="compartment-card">
+                <div class="compartment-card__icon">🔶</div>
+                <div class="compartment-card__title">Tajam</div>
+                <div class="compartment-card__level" id="retrieval-sharps-level">25%</div>
+                <div class="compartment-card__bar">
+                  <div class="compartment-card__fill" id="retrieval-sharps-fill" style="width:25%"></div>
+                </div>
+              </div>
+              <!-- Infeksius -->
+              <div class="compartment-card">
+                <div class="compartment-card__icon">☣️</div>
+                <div class="compartment-card__title">Infeksius</div>
+                <div class="compartment-card__level" id="retrieval-infeksius-level">10%</div>
+                <div class="compartment-card__bar">
+                  <div class="compartment-card__fill" id="retrieval-infeksius-fill" style="width:10%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:6px">
+              <div class="card__note" id="retrievalNote">Pilih kompartemen untuk diambil.</div>
+            </div>
+
+            <div class="grid" style="margin-top:6px; gap:4px;">
+              <button class="btn btn--ghost btn--block" id="btnRetrieveSharps" type="button" style="margin-top:0; font-size:11px; padding:8px">
+                Ambil Safety Box
+              </button>
+              <button class="btn btn--ghost btn--block" id="btnRetrieveInfeksius" type="button" style="margin-top:0; font-size:11px; padding:8px">
+                Ambil Kantong Biohazard
+              </button>
+              <button class="btn btn--danger btn--block" id="btnRetrievalDone" type="button" style="margin-top:0; font-size:11px; padding:8px">
+                Selesai
+              </button>
+            </div>
+
+            <footer class="footer" aria-label="Info">
+              <div class="hint">Akses: Petugas Kebersihan</div>
+              <div class="hint">Level 2</div>
             </footer>
           </section>
         </div>
       </section>
 
       <aside class="notes" aria-label="Catatan">
-        <h2 class="h2">Catatan</h2>
+        <h2 class="h2">Catatan Prototype</h2>
         <ul class="list">
-          <li>Frame hitam = modul TFT; area dalam = 240×320 px.</li>
-          <li>Layout dibuat minimal, mirip UI embedded.</li>
-          <li>Kamu bisa ubah teks/warna sesuai kebutuhan esai.</li>
+          <li>Frame gelap = modul TFT ~3.2" (280×380 portrait); area dalam = tampilan layar.</li>
+          <li>Interaksi di prototipe ini menggunakan klik mouse — di perangkat asli menggunakan <strong>2 tombol fisik</strong> (A/B) berukuran besar.</li>
+          <li>LED indikator kapasitas (Sharp = Benda Tajam, Infeksius): hijau → kuning → merah berkedip.</li>
+          <li>Fail-safe: jika tidak ada input selama 60 detik, limbah otomatis diarahkan ke <strong>safety box (benda tajam)</strong>.</li>
+          <li>Level 1 (Tenaga Medis) = buang limbah. Level 2 (Petugas Kebersihan) = ambil kompartemen.</li>
         </ul>
       </aside>
     </main>
 
-    <!-- Script di-load terakhir agar DOM sudah siap sebelum wiring event. -->
     <script src="./app.js"></script>
   </body>
 </html>

@@ -1,19 +1,20 @@
 /**
- * Data master kategori limbah (copywriting untuk UI prototype).
+ * Medisafe Bin — Prototype UI Logic (280×380, non-touch, tombol fisik)
+ *
+ * Data master kategori limbah:
+ * - Benda Tajam → safety box (rigid, tahan penetrasi)
+ * - Infeksius → kantong biohazard (heat-sealed otomatis)
+ *
  * Key dipakai oleh tombol `data-choice` di `index.html`.
  */
 const CHOICES = {
   sharps: {
     label: 'Limbah Benda Tajam',
-    note: 'Contoh: jarum suntik, pisau bedah, ampul pecah.',
+    note: 'Jarum suntik, ampul, lancet, pisau bedah → Safety Box.',
   },
   infeksius: {
     label: 'Limbah Infeksius',
-    note: 'Contoh: limbah terkontaminasi darah/cairan tubuh (kasa, sarung tangan, dll).',
-  },
-  noninfeksius: {
-    label: 'Limbah Noninfeksius',
-    note: 'Contoh: kertas, plastik bersih, kemasan (tidak terkontaminasi).',
+    note: 'Kasa terkontaminasi, sarung tangan bekas, spuit → Kantong Biohazard.',
   },
 };
 
@@ -24,7 +25,7 @@ const CHOICES = {
  */
 const CHOICE_UI = {
   sharps: {
-    theme: 'theme-yellow',
+    theme: 'theme-sharps',
     iconHtml: `
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M3 21l6.5-6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -35,33 +36,42 @@ const CHOICE_UI = {
     `.trim(),
   },
   infeksius: {
-    theme: 'theme-yellow',
-    iconHtml: `<span style="font-size:22px;line-height:1">☣</span>`,
-  },
-  noninfeksius: {
-    theme: 'theme-green',
-    iconHtml: `
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <path d="M10 7V5h4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <path d="M7 7l1 14h8l1-14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        <path d="M10 11v7M14 11v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    `.trim(),
+    theme: 'theme-infeksius',
+    iconHtml: `<span style="font-size:20px;line-height:1">☣</span>`,
   },
 };
 
-// Failsafe: jika tidak memilih klasifikasi, otomatis infeksius.
+/**
+ * Fail-safe: jika tidak memilih kategori, otomatis → BENDA TAJAM.
+ * Alasan: safety box rigid mampu menahan kedua jenis limbah,
+ * sedangkan kantong biohazard berisiko tertembus benda tajam.
+ */
 const FAILSAFE_SECONDS = 60;
 
-// Durasi animasi (mock untuk esai)
-const OPENING_MS = 1200;
-const CLOSING_MS = 1600;
-const ROUTING_MS = 2200;
+// Durasi animasi (mock untuk prototype)
+const OPENING_MS  = 1200;
+const CLOSING_MS  = 1600;
+const ROUTING_MS  = 2200;
+const DISINFECT_MS = 1800;
+
+/**
+ * Simulasi kapasitas kompartemen (bertambah setiap buang sampah).
+ * Threshold: 0-59% hijau, 60-84% kuning, 85-100% merah.
+ */
+const capacity = {
+  sharps: 25,
+  infeksius: 10,
+};
+
+const CAPACITY_THRESHOLD_YELLOW = 60;
+const CAPACITY_THRESHOLD_RED = 85;
+
+/* ──────────────────────────────────────────
+   CORE FUNCTIONS
+   ────────────────────────────────────────── */
 
 /**
  * Menampilkan 1 layar (view) dan menyembunyikan yang lain.
- * `id` harus cocok dengan id pada <section class="view" ...> di HTML.
  */
 function showView(id) {
   document.querySelectorAll('.view').forEach((v) => v.classList.remove('view--active'));
@@ -71,7 +81,6 @@ function showView(id) {
 
 /**
  * Format countdown menjadi `MM:SS`.
- * Dipakai untuk failsafe timer di layar klasifikasi.
  */
 function formatMMSS(totalSeconds) {
   const s = Math.max(0, Math.floor(totalSeconds));
@@ -81,8 +90,7 @@ function formatMMSS(totalSeconds) {
 }
 
 /**
- * Animasi progress bar sederhana berbasis requestAnimationFrame.
- * Catatan: Ini murni mock UI (tidak mengontrol hardware).
+ * Animasi progress bar (mock UI).
  */
 function animateBar(barEl, durationMs) {
   if (!barEl) return;
@@ -98,15 +106,79 @@ function animateBar(barEl, durationMs) {
   requestAnimationFrame(frame);
 }
 
+/* ──────────────────────────────────────────
+   LED CAPACITY INDICATORS
+   ────────────────────────────────────────── */
+
+function getCapacityLevel(pct) {
+  if (pct >= CAPACITY_THRESHOLD_RED) return 'red';
+  if (pct >= CAPACITY_THRESHOLD_YELLOW) return 'yellow';
+  return 'green';
+}
+
+function updateLEDs() {
+  ['sharps', 'infeksius'].forEach((cat) => {
+    const level = getCapacityLevel(capacity[cat]);
+    const dots = document.querySelectorAll(`.led-group--${cat} .led-dot`);
+
+    dots.forEach((dot) => {
+      dot.classList.remove('led-dot--active', 'led-dot--green', 'led-dot--yellow', 'led-dot--red');
+    });
+
+    if (level === 'green' && dots[0]) {
+      dots[0].classList.add('led-dot--active', 'led-dot--green');
+    } else if (level === 'yellow') {
+      if (dots[0]) dots[0].classList.add('led-dot--active', 'led-dot--green');
+      if (dots[1]) dots[1].classList.add('led-dot--active', 'led-dot--yellow');
+    } else if (level === 'red') {
+      if (dots[0]) dots[0].classList.add('led-dot--active', 'led-dot--green');
+      if (dots[1]) dots[1].classList.add('led-dot--active', 'led-dot--yellow');
+      if (dots[2]) dots[2].classList.add('led-dot--active', 'led-dot--red');
+    }
+  });
+}
+
+function incrementCapacity(cat) {
+  capacity[cat] = Math.min(100, capacity[cat] + Math.floor(Math.random() * 8 + 5));
+  updateLEDs();
+  updateRetrievalView();
+}
+
+/* ──────────────────────────────────────────
+   RETRIEVAL VIEW (Level 2 - Petugas Kebersihan)
+   ────────────────────────────────────────── */
+
+function updateRetrievalView() {
+  ['sharps', 'infeksius'].forEach((cat) => {
+    const pct = capacity[cat];
+    const levelEl = document.getElementById(`retrieval-${cat}-level`);
+    const fillEl = document.getElementById(`retrieval-${cat}-fill`);
+
+    if (levelEl) levelEl.textContent = `${pct}%`;
+    if (fillEl) {
+      fillEl.style.width = `${pct}%`;
+      fillEl.classList.remove('compartment-card__fill--yellow', 'compartment-card__fill--red');
+      const level = getCapacityLevel(pct);
+      if (level === 'yellow') fillEl.classList.add('compartment-card__fill--yellow');
+      if (level === 'red') fillEl.classList.add('compartment-card__fill--red');
+    }
+  });
+}
+
+/* ──────────────────────────────────────────
+   UI POPULATION FUNCTIONS
+   ────────────────────────────────────────── */
+
 /**
- * Mengisi UI pada layar routing + layar session actions (hasil akhir).
- * @param {keyof typeof CHOICES} choiceKey
+ * Mengisi UI pada layar routing + layar session actions.
+ * @param {string} choiceKey
  * @param {string} noteSuffix
  */
 function setRoute(choiceKey, noteSuffix) {
   const data = CHOICES[choiceKey];
   const ui = CHOICE_UI[choiceKey];
 
+  // Route card
   const iconEl = document.getElementById('routeIcon');
   if (iconEl) iconEl.innerHTML = ui?.iconHtml ?? '';
 
@@ -115,16 +187,18 @@ function setRoute(choiceKey, noteSuffix) {
 
   const noteEl = document.getElementById('routeNote');
   if (noteEl) {
-    noteEl.textContent = noteSuffix ? `${data?.note ?? ''} ${noteSuffix}`.trim() : (data?.note ?? '');
+    noteEl.textContent = noteSuffix
+      ? `${data?.note ?? ''} ${noteSuffix}`.trim()
+      : (data?.note ?? '');
   }
 
   const cardEl = document.getElementById('routeCard');
   if (cardEl) {
-    cardEl.classList.remove('theme-neutral', 'theme-yellow', 'theme-green');
+    cardEl.classList.remove('theme-neutral', 'theme-sharps', 'theme-infeksius');
     cardEl.classList.add(ui?.theme ?? 'theme-neutral');
   }
 
-  // Also update post-routing session alert
+  // Session card
   const sessionIconEl = document.getElementById('sessionIcon');
   if (sessionIconEl) sessionIconEl.innerHTML = ui?.iconHtml ?? '';
 
@@ -140,14 +214,14 @@ function setRoute(choiceKey, noteSuffix) {
 
   const sessionCardEl = document.getElementById('sessionCard');
   if (sessionCardEl) {
-    sessionCardEl.classList.remove('theme-neutral', 'theme-yellow', 'theme-green');
+    sessionCardEl.classList.remove('theme-neutral', 'theme-sharps', 'theme-infeksius');
     sessionCardEl.classList.add(ui?.theme ?? 'theme-neutral');
   }
 }
 
 /**
- * Mengisi UI pada layar konfirmasi (sebelum routing).
- * @param {keyof typeof CHOICES} choiceKey
+ * Mengisi UI pada layar konfirmasi.
+ * @param {string} choiceKey
  */
 function setConfirm(choiceKey) {
   const data = CHOICES[choiceKey];
@@ -164,28 +238,28 @@ function setConfirm(choiceKey) {
 
   const cardEl = document.getElementById('confirmCard');
   if (cardEl) {
-    cardEl.classList.remove('theme-neutral', 'theme-yellow', 'theme-green');
+    cardEl.classList.remove('theme-neutral', 'theme-sharps', 'theme-infeksius');
     cardEl.classList.add(ui?.theme ?? 'theme-neutral');
   }
 }
 
-/**
- * Entry point: memasang event handler, mengelola state session,
- * dan menjalankan failsafe timer untuk layar klasifikasi.
- */
-function wire() {
-  // Default start screen.
-  showView('view-rfid');
+/* ──────────────────────────────────────────
+   MAIN WIRING
+   ────────────────────────────────────────── */
 
-  // State sederhana: setelah RFID diterima, user boleh ulang buang sampah
-  // tanpa scan ulang (sampai menekan "Selesai").
+function wire() {
+  showView('view-rfid');
+  updateLEDs();
+
+  // Session state
   let sessionActive = false;
+  let accessLevel = null; // 'medis' | 'kebersihan'
 
   const openBtn = document.getElementById('btnOpenLid');
   const openProgress = document.getElementById('openProgress');
   const openBar = document.getElementById('openBar');
   const openSub = document.querySelector('#view-open .sub');
-  // Helper: reset tampilan view-open setiap kali user masuk view ini.
+
   const resetOpenView = () => {
     if (openBtn) {
       openBtn.style.display = '';
@@ -197,18 +271,57 @@ function wire() {
     if (openSub) openSub.textContent = 'Tekan tombol untuk membuka penutup bin.';
   };
 
-  // Simulasi RFID (tanpa hardware): mengaktifkan session.
-  document.getElementById('btnScan')?.addEventListener('click', () => {
+  /* ── RFID Level 1: Tenaga Medis ── */
+  document.getElementById('btnScanMedis')?.addEventListener('click', () => {
     const status = document.getElementById('rfidStatus');
-    if (status) status.textContent = 'RFID diterima (Nakes).';
+    if (status) status.textContent = 'RFID diterima — Tenaga Medis';
     sessionActive = true;
+    accessLevel = 'medis';
     resetOpenView();
     showView('view-open');
   });
 
-  // Logout: kembali ke layar RFID dan menonaktifkan session.
+  /* ── RFID Level 2: Petugas Kebersihan ── */
+  document.getElementById('btnScanKebersihan')?.addEventListener('click', () => {
+    const status = document.getElementById('rfidStatus');
+    if (status) status.textContent = 'RFID diterima — Petugas Kebersihan';
+    sessionActive = true;
+    accessLevel = 'kebersihan';
+    updateRetrievalView();
+    showView('view-retrieval');
+  });
+
+  /* ── Retrieval: Simulasi buka pintu samping ── */
+  document.getElementById('btnRetrieveSharps')?.addEventListener('click', () => {
+    capacity.sharps = 0;
+    updateLEDs();
+    updateRetrievalView();
+    const note = document.getElementById('retrievalNote');
+    if (note) note.textContent = '✓ Safety box benda tajam diganti.';
+  });
+
+  document.getElementById('btnRetrieveInfeksius')?.addEventListener('click', () => {
+    capacity.infeksius = 0;
+    updateLEDs();
+    updateRetrievalView();
+    const note = document.getElementById('retrievalNote');
+    if (note) note.textContent = '✓ Kantong biohazard tersegel diambil.';
+  });
+
+  document.getElementById('btnRetrievalDone')?.addEventListener('click', () => {
+    sessionActive = false;
+    accessLevel = null;
+    const status = document.getElementById('rfidStatus');
+    if (status) status.textContent = 'Menunggu RFID…';
+    const note = document.getElementById('retrievalNote');
+    if (note) note.textContent = 'Pilih kompartemen untuk diambil.';
+    showView('view-rfid');
+  });
+
+  /* ── Logout ── */
   const doLogout = () => {
     sessionActive = false;
+    accessLevel = null;
     const status = document.getElementById('rfidStatus');
     if (status) status.textContent = 'Menunggu RFID…';
     resetOpenView();
@@ -216,13 +329,14 @@ function wire() {
   };
 
   document.getElementById('btnLogout')?.addEventListener('click', doLogout);
+
   document.getElementById('btnOpenAgain')?.addEventListener('click', () => {
     if (!sessionActive) return;
     resetOpenView();
     showView('view-open');
   });
 
-  // Step: membuka penutup (mock progress), lalu masuk ke insert.
+  /* ── Step: Buka penutup (servo) → insert ── */
   openBtn?.addEventListener('click', () => {
     if (openBtn) {
       openBtn.disabled = true;
@@ -238,9 +352,7 @@ function wire() {
     }, OPENING_MS);
   });
 
-  // Failsafe countdown (only active on classify screen)
-  // - Jika user diam selama FAILSAFE_SECONDS saat di view-classify,
-  //   sistem auto memilih kategori `infeksius`.
+  /* ── Failsafe countdown (hanya di view-classify) ── */
   let lastInputAt = Date.now();
   let failsafeFired = false;
   let pendingChoiceKey = null;
@@ -254,36 +366,43 @@ function wire() {
     if (countdownEl) countdownEl.textContent = formatMMSS(FAILSAFE_SECONDS);
   };
 
-  // Menjalankan proses routing (mock motor), lalu menuju layar session.
+  /* ── Routing (servo motor) → disinfeksi → session ── */
   function startRouting(choiceKey, noteSuffix) {
+    // Increment capacity for the chosen category
+    incrementCapacity(choiceKey);
+
     setRoute(choiceKey, noteSuffix);
     showView('view-routing');
     animateBar(document.getElementById('routeBar'), ROUTING_MS);
+
     window.setTimeout(() => {
-      if (sessionActive) {
-        showView('view-session');
-      } else {
-        const status = document.getElementById('rfidStatus');
-        if (status) status.textContent = 'Menunggu RFID…';
-        showView('view-rfid');
-      }
+      // After routing → disinfection step
+      showView('view-disinfect');
+      animateBar(document.getElementById('disinfectBar'), DISINFECT_MS);
+
+      window.setTimeout(() => {
+        if (sessionActive) {
+          showView('view-session');
+        } else {
+          doLogout();
+        }
+      }, DISINFECT_MS);
     }, ROUTING_MS);
   }
 
-  // Tombol di layar konfirmasi: kembali (biar user bisa ganti pilihan).
+  /* ── Konfirmasi: kembali / OK ── */
   document.getElementById('btnConfirmBack')?.addEventListener('click', () => {
     showView('view-classify');
     resetIdle();
   });
 
-  // Tombol di layar konfirmasi: OK = lanjut routing.
   document.getElementById('btnConfirmOk')?.addEventListener('click', () => {
     if (!pendingChoiceKey) return;
     startRouting(pendingChoiceKey, '');
     pendingChoiceKey = null;
   });
 
-  // Step: sampah sudah masuk → tutup penutup → masuk klasifikasi.
+  /* ── Step: sampah masuk → tutup penutup → klasifikasi ── */
   document.getElementById('btnInserted')?.addEventListener('click', () => {
     showView('view-closing');
     animateBar(document.getElementById('closingBar'), CLOSING_MS);
@@ -293,6 +412,7 @@ function wire() {
     }, CLOSING_MS);
   });
 
+  /* ── Failsafe timer tick ── */
   const tick = () => {
     if (!isClassifyActive()) return;
     const elapsed = (Date.now() - lastInputAt) / 1000;
@@ -300,12 +420,12 @@ function wire() {
     if (countdownEl) countdownEl.textContent = formatMMSS(remaining);
     if (!failsafeFired && remaining <= 0) {
       failsafeFired = true;
-      startRouting('infeksius', '(Dipilih otomatis)');
+      // Fail-safe: otomatis ke BENDA TAJAM (bukan infeksius)
+      startRouting('sharps', '(Fail-safe: safety box)');
     }
   };
 
-  // Setiap ada input (touch/klik/keyboard) saat layar klasifikasi aktif,
-  // reset timer agar failsafe tidak terpanggil.
+  // Reset timer saat ada input di layar klasifikasi
   ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach((evt) => {
     document.addEventListener(
       evt,
@@ -316,10 +436,9 @@ function wire() {
     );
   });
 
-  // Timer kecil untuk update countdown UI.
   window.setInterval(tick, 200);
 
-  // Binding tombol-tombol kategori (berdasarkan `data-choice`).
+  /* ── Binding tombol kategori ── */
   document.querySelectorAll('#view-classify [data-choice]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.getAttribute('data-choice');

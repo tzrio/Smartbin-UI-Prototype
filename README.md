@@ -1,67 +1,54 @@
-# Layar Klasifikasi — UI Prototype (240×320)
+# Medisafe Bin — UI Prototype (280×380, ~3.2" TFT)
 
-Prototype ini dibuat **dengan ngoding** (HTML/CSS/JS) supaya kamu bisa cepat dapet desain layar 240×320 untuk dimasukkan ke esai.
+Prototype ini dibuat **dengan ngoding** (HTML/CSS/JS) untuk simulasi tampilan layar TFT 280×380 pada sistem **Medisafe Bin** — sistem pemilahan limbah medis padat semi-otomatis untuk puskesmas.
 
-Dokumentasi lebih detail ada di: [ui-prototype-web/README.md](ui-prototype-web/README.md)
+Dokumentasi lebih detail ada di: [ui-prototype-web/README.md](Layar_Klasifikasi/ui-prototype-web/README.md)
 
 ## Cara menjalankan
 
 Opsi paling simpel:
-- Buka file [ui-prototype-web/index.html](ui-prototype-web/index.html) langsung di browser.
+- Buka file [index.html](Layar_Klasifikasi/ui-prototype-web/index.html) langsung di browser.
 
-Untuk kebutuhan esai (screenshot cepat per layar):
-- Buka storyboard mockup statis: [ui-prototype-web/mockup.html](ui-prototype-web/mockup.html)
+Untuk kebutuhan esai (screenshot semua layar sekaligus):
+- Buka storyboard mockup statis: [mockup.html](Layar_Klasifikasi/ui-prototype-web/mockup.html)
 
 Untuk demo interaktif (flow berjalan per langkah):
-- Buka: [ui-prototype-web/index.html](ui-prototype-web/index.html)
-
-Kalau mau “serasa device” tapi tanpa `npx`/npm:
-- (PowerShell) Buka langsung via command:
-  - `Start-Process .\ui-prototype-web\index.html`
-- (Kalau ada Python) Jalankan server lokal:
-  - `python -m http.server 8000`
-  - lalu buka `http://localhost:8000/ui-prototype-web/`
-
-Opsi lebih rapi (kalau kamu punya Node.js):
-- Jalankan server statis dari folder `Layar_Klasifikasi`:
-  - `npx serve`
-  - lalu buka URL yang ditampilkan.
-
-## Jika `npx serve` error `CERT_NOT_YET_VALID`
-
-Itu biasanya karena masalah waktu/sertifikat TLS di Windows (jam belum sinkron, Windows Time service mati, atau ada proxy/SSL inspection).
-
-Yang bisa kamu coba (urut dari yang paling aman):
-- Pastikan Date/Time & Time Zone Windows benar, lalu klik **Sync now**.
-- Pastikan Windows Time service jalan (PowerShell, kadang perlu Run as Administrator):
-  - `Set-Service w32time -StartupType Automatic`
-  - `Start-Service w32time`
-  - `w32tm /resync`
-
-Kalau ini workspace offline / jaringan kampus/kantor ribet, kamu tidak perlu `npx` sama sekali karena prototype ini tidak butuh API—cukup buka HTML-nya langsung.
+- Buka: [index.html](Layar_Klasifikasi/ui-prototype-web/index.html)
 
 ## Yang diprototype
 
-- Resolusi layar: **240×320 px** (portrait)
-- 3 kategori: **Sharps**, **Infeksius**, **Noninfeksius**
-- Flow sederhana: pilih kategori → konfirmasi → sukses
+- Resolusi layar: **280×380 px** (portrait, ~3.2" TFT)
+- **Non-touch** — interaksi via tombol fisik (disimulasikan dengan klik)
+- 2 kategori limbah: **Benda Tajam** (safety box) dan **Infeksius** (kantong biohazard)
+- Dual RFID access: **Level 1** (Tenaga Medis) dan **Level 2** (Petugas Kebersihan)
+- Fail-safe: timeout → otomatis ke **Benda Tajam** (safety box rigid)
+- Disinfeksi otomatis setelah pembuangan
+- LED indikator kapasitas (hijau/kuning/merah) per kompartemen
+
+## Flow
+
+**Level 1 (Tenaga Medis):**
+RFID → Buka Penutup → Masukkan Limbah → Tutup Penutup → Pilih Kategori → Konfirmasi → Routing Motor → Sterilisasi → Selesai/Lanjut
+
+**Level 2 (Petugas Kebersihan):**
+RFID → Panel Pengambilan (status + ambil kompartemen) → Selesai
 
 ## Struktur folder
 
-- `ui-prototype-web/`
-  - `index.html` (interaktif)
-  - `mockup.html` (storyboard statis)
-  - `app.js` (flow + failsafe + progress bar)
-  - `style.css` (tampilan embedded)
+- `Layar_Klasifikasi/ui-prototype-web/`
+  - `index.html` — demo interaktif (flow per langkah)
+  - `mockup.html` — storyboard statis (10 layar, untuk screenshot esai)
+  - `app.js` — logic: flow, failsafe, capacity, dual RFID
+  - `style.css` — dark-mode embedded UI
 
-## Catatan untuk implementasi ESP
+## Catatan untuk implementasi ESP32
 
-Untuk firmware TFT touch, jalur yang paling nyambung biasanya:
-- **LVGL (C/C++)** + driver (mis. ILI9341/ST7789) + touch (XPT2046/FT6236)
-- UI ini bisa kamu jadikan referensi layout & state saat kamu porting ke LVGL.
+- Layar: TFT ~3.2" ILI9341/ST7789 (280×380, non-touch)
+- Input: 2 tombol fisik besar (A/B) + RFID reader
+- UI firmware: **LVGL (C/C++)** + driver TFT
+- Prototype ini bisa dijadikan referensi layout & state saat porting ke LVGL
 
-## Catatan (untuk upload ke GitHub)
+## Catatan upload GitHub
 
-Kalau kamu mau upload:
-- Pastikan file sensitif tidak ikut (mis. `.env`, credential, dsb). Project prototype ini seharusnya aman karena hanya HTML/CSS/JS statis.
-- Setelah repo dibuat, kamu tinggal `git init`, `git add .`, `git commit`, lalu `git push`.
+- Pastikan file sensitif tidak ikut (`.env`, credential, dsb)
+- Project ini hanya HTML/CSS/JS statis, aman untuk di-push

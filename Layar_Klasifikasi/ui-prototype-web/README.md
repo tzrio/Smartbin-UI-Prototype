@@ -1,47 +1,30 @@
-# UI Prototype Web (Safety Bin / SmartBin)
+# Medisafe Bin — UI Prototype Web
 
-Folder ini berisi prototype UI berbasis web (HTML/CSS/JS) untuk mensimulasikan layar kecil **240×320** (portrait) seperti modul TFT pada perangkat SmartBin.
+Prototype web untuk layar TFT 240×320 (2.8", portrait, non-touch) pada sistem **Medisafe Bin**.
 
-## Cara menjalankan
+## File
 
-Tanpa install apa pun:
-- Buka [index.html](index.html) langsung di browser.
+| File | Keterangan |
+|------|-----------|
+| `index.html` | Demo interaktif — flow berjalan per langkah |
+| `mockup.html` | Storyboard statis — 10 layar untuk screenshot esai |
+| `app.js` | Logic: flow, failsafe, LED capacity, dual RFID |
+| `style.css` | Dark-mode embedded UI, responsive |
 
-Mode storyboard (untuk screenshot per layar):
-- Buka [mockup.html](mockup.html) — semua layar ditampilkan sekaligus (tanpa JavaScript).
+## Cara pakai
 
-Opsional (kalau mau URL `http://localhost`):
-- Dari folder `Layar_Klasifikasi`, jalankan server statis apa saja.
-  - Python: `python -m http.server 8000`
-  - Lalu buka: `http://localhost:8000/ui-prototype-web/`
+1. Buka `index.html` di browser untuk demo interaktif
+2. Buka `mockup.html` untuk screenshot semua state sekaligus
 
-## Struktur file
+## 10 Layar (Views)
 
-- [index.html](index.html)
-  - Versi interaktif: hanya 1 layar aktif sekaligus (di-toggle dengan class `view--active`).
-  - Elemen penting punya `id` untuk di-update JS (mis. `rfidStatus`, `idleCountdown`).
-- [app.js](app.js)
-  - Logika flow (state machine sederhana) + animasi progress bar (mock).
-  - Failsafe: kalau user tidak memilih kategori dalam 60 detik, auto pilih **infeksius**.
-- [style.css](style.css)
-  - Styling “embedded-like”: font besar, kontras jelas, layout tidak gampang overflow.
-- [mockup.html](mockup.html)
-  - Storyboard statis: semua layar tampil untuk kebutuhan dokumentasi/esai.
-
-## Alur layar (flow)
-
-1. RFID (simulasi) →
-2. Buka penutup (progress) →
-3. Masukkan sampah →
-4. Menutup penutup (progress) →
-5. Pilih klasifikasi (failsafe countdown) →
-6. Konfirmasi →
-7. Routing (progress) →
-8. Pilih aksi (lanjut / selesai)
-
-## Catatan implementasi firmware (opsional)
-
-Prototype ini tidak terhubung ke sensor/motor. Saat dipindahkan ke firmware:
-- `showView(...)` di JS setara dengan “ganti screen/state” di LVGL/firmware.
-- Progress bar setara dengan animasi/indikator proses motor.
-- Failsafe timer bisa jadi watchdog untuk mencegah device “menggantung” di layar klasifikasi.
+1. **Autentikasi RFID** — scan kartu, pilih level akses
+2. **Buka Penutup** — servo membuka lubang pembuangan
+3. **Masukkan Limbah** — instruksi masukkan limbah
+4. **Menutup Penutup** — servo menutup lubang
+5. **Pilih Kategori** — 2 tombol: Benda Tajam (A) / Infeksius (B)
+6. **Konfirmasi** — verifikasi pilihan sebelum routing
+7. **Mengarahkan** — servo motor mengarahkan ke kompartemen
+8. **Sterilisasi** — solenoid valve menyemprotkan disinfektan
+9. **Selesai** — lanjut buang atau logout
+10. **Pengambilan Limbah** — panel khusus petugas kebersihan (Level 2)
